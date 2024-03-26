@@ -14,12 +14,19 @@ for w in x:
 	if w not in v:
 		v[w]=index
 		index+=1
+
+v2w={}
+for k in v:
+	w=v[k]
+	v2w[w]=k
 #kprint(v)
 #soD('war-and-peace-data.pkl',dict(x=x,v=v))
 
-src_vocab_size=len(x)
+src_vocab_size=len(v)+100
 tgt_vocab_size=src_vocab_size
 cm(src_vocab_size)
+
+x=x[:len(x)//200]
 
 def get_src_tgt_data(max_seq_length,batch_size):
 	src_data=[]

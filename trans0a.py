@@ -235,7 +235,7 @@ optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), e
 transformer.train()
 
 
-for epoch in range(10000):
+for epoch in range(1000000):
     #print(epoch)
     optimizer.zero_grad()
 
@@ -250,7 +250,7 @@ for epoch in range(10000):
     
 
 
-    if not epoch%100:
+    if not epoch%1000:
         print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
         transformer.eval()
 
@@ -266,9 +266,16 @@ for epoch in range(10000):
 
             val_output = transformer(val_src_data, val_tgt_data[:, :-1])
 
-            print(val_src_data.size(),val_tgt_data[:, :-1].size(),val_output.size())
-
-
+            #print(val_src_data.size(),val_tgt_data[:, :-1].size(),val_output.size())
+            print(40*'=')
+            for b in range(batch_size):
+                ws=[]
+                for i in range(max_seq_length-1):
+                    a=val_output[b,i,:].detach().cpu().numpy()
+                    j=np.argmax(a)
+                    ws.append(v2w[j])
+                print(' '.join(ws))
+            print(40*'=')
             val_loss = criterion(val_output.contiguous().view(-1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
             print(f"Validation Loss: {val_loss.item()}")
 
