@@ -14,8 +14,10 @@ import torch.utils.data as data
 import math
 import copy
 
-
-device='cuda:0'
+if not torch.cuda.is_available():
+    device="cpu"
+else:
+    device='cuda:0'
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
