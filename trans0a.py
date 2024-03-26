@@ -22,10 +22,10 @@ if not torch.cuda.is_available():
     d_ff = 128
 else:
     device='cuda:0'
-    d_model = 512
+    d_model = 128
     num_heads = 8
     num_layers = 6
-    d_ff = 2048
+    d_ff = 128
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
@@ -243,7 +243,7 @@ if False:
 
 
 criterion = nn.CrossEntropyLoss(ignore_index=0)
-optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
+optimizer = optim.Adam(transformer.parameters(), lr=0.00001, betas=(0.5, 0.98), eps=1e-9)
 
 transformer.train()
 
@@ -288,7 +288,7 @@ for epoch in range(epoch,100000000):
         #val_src_data = torch.randint(1, src_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
         #val_tgt_data = torch.randint(1, tgt_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
         
-        val_src_data,val_tgt_data=get_src_tgt_data(stop,stop+1000,max_seq_length,batch_size)
+        val_src_data,val_tgt_data=get_src_tgt_data(stop,len(x),max_seq_length,batch_size)
         val_src_data=val_src_data.to(device)
         val_tgt_data=val_tgt_data.to(device)
 
