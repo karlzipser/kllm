@@ -202,12 +202,15 @@ class Transformer(nn.Module):
 
 
 
-#src_vocab_size = 5000
-#tgt_vocab_size = 5000
-d_model = 64
+
+
+
+
+d_model = 512
 num_heads = 8
 num_layers = 6
-d_ff = 64
+d_ff = 2048
+
 max_seq_length = 10
 dropout = 0.1
 batch_size=16
@@ -221,6 +224,9 @@ from kllm.preprocess import *
 transformer = Transformer(src_vocab_size, tgt_vocab_size, d_model, num_heads, num_layers, d_ff, max_seq_length, dropout)
 transformer.to(device)
 
+
+if False:
+    cb('\t',transformer.load_state_dict(torch.load(opjD('transformer.pth')),strict=False))
 # Generate random sample data
 #src_data = torch.randint(1, src_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
 #tgt_data = torch.randint(1, tgt_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
@@ -235,11 +241,25 @@ optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), e
 transformer.train()
 
 
-for epoch in range(1000000):
-    #print(epoch)
+
+display_timer=Timer(30)
+display_timer.trigger()
+save_timer=Timer(300)
+train_epochs=[]
+train_losses=[]
+val_epochs=[]
+val_losses=[]
+
+epoch=0
+
+
+start,stop=0,len(x)//2
+
+for epoch in range(epoch,100000000):
+    printr(epoch)
     optimizer.zero_grad()
 
-    src_data,tgt_data=get_src_tgt_data(max_seq_length,batch_size)
+    src_data,tgt_data=get_src_tgt_data(start,stop,max_seq_length,batch_size)
     src_data=src_data.to(device)
     tgt_data=tgt_data.to(device)
 
@@ -250,15 +270,18 @@ for epoch in range(1000000):
     
 
 
-    if not epoch%1000:
+    if display_timer.rcheck():#not epoch%1000:
         print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
+        train_epochs.append(epoch)
+        train_losses.append(loss.item())
+
         transformer.eval()
 
         # Generate random sample validation data
         #val_src_data = torch.randint(1, src_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
         #val_tgt_data = torch.randint(1, tgt_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
         
-        val_src_data,val_tgt_data=get_src_tgt_data(max_seq_length,batch_size)
+        val_src_data,val_tgt_data=get_src_tgt_data(stop,stop+1000,max_seq_length,batch_size)
         val_src_data=val_src_data.to(device)
         val_tgt_data=val_tgt_data.to(device)
 
@@ -266,20 +289,47 @@ for epoch in range(1000000):
 
             val_output = transformer(val_src_data, val_tgt_data[:, :-1])
 
-            #print(val_src_data.size(),val_tgt_data[:, :-1].size(),val_output.size())
+        
             print(40*'=')
             for b in range(batch_size):
+                ws=[]
+                for i in range(max_seq_length):
+                    j=int(val_src_data[b,i].detach().cpu().numpy())
+                    ws.append(v2w[j])
+                ws0=[' '.join(ws),'`g--']
                 ws=[]
                 for i in range(max_seq_length-1):
                     a=val_output[b,i,:].detach().cpu().numpy()
                     j=np.argmax(a)
                     ws.append(v2w[j])
-                print(' '.join(ws))
+                ws=ws0+[' '.join(ws)]
+                clp(*ws)
             print(40*'=')
             val_loss = criterion(val_output.contiguous().view(-1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
             print(f"Validation Loss: {val_loss.item()}")
+            val_epochs.append(epoch)
+            val_losses.append(val_loss.item())
+
+        figure(1)
+        clf()
+        plot(train_epochs,train_losses,'b')
+        plot(val_epochs,val_losses,'r')
+        spause()
 
         transformer.train()
+
+        if save_timer.rcheck():
+            torch.save(transformer.state_dict(),opjD('transformer.pth'))
+
+
+
+
+
+
+
+
+
+
 
 #EOF
 
