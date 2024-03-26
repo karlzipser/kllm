@@ -16,8 +16,16 @@ import copy
 
 if not torch.cuda.is_available():
     device="cpu"
+    d_model = 64
+    num_heads = 8
+    num_layers = 6
+    d_ff = 128
 else:
     device='cuda:0'
+    d_model = 512
+    num_heads = 8
+    num_layers = 6
+    d_ff = 2048
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
@@ -208,10 +216,7 @@ class Transformer(nn.Module):
 
 
 
-d_model = 512
-num_heads = 8
-num_layers = 6
-d_ff = 2048
+
 
 max_seq_length = 10
 dropout = 0.1
