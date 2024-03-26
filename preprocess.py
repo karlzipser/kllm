@@ -32,11 +32,14 @@ cm(src_vocab_size)
 
 
 
-def get_src_tgt_data(start,stop,max_seq_length,batch_size):
+def get_src_tgt_data(start,stop,max_seq_length,batch_size,index_tracker):
 	src_data=[]
 	tgt_data=[]
 	for b in range(batch_size):
 		i=randint(start,stop-2*max_seq_length)
+		if i not in index_tracker:
+			index_tracker[i]=0
+		index_tracker[i]+=1
 		src=x[i:i+max_seq_length]
 		tgt=x[i+max_seq_length:i+2*max_seq_length]
 		#cm(src)
