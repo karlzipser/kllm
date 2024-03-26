@@ -15,7 +15,7 @@ import math
 import copy
 
 
-
+device='cuda:0'
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
@@ -175,10 +175,10 @@ class Transformer(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def generate_mask(self, src, tgt):
-        src_mask = (src != 0).unsqueeze(1).unsqueeze(2)
-        tgt_mask = (tgt != 0).unsqueeze(1).unsqueeze(3)
+        src_mask = (src != 0).unsqueeze(1).unsqueeze(2).to(device)
+        tgt_mask = (tgt != 0).unsqueeze(1).unsqueeze(3).to(device)
         seq_length = tgt.size(1)
-        nopeak_mask = (1 - torch.triu(torch.ones(1, seq_length, seq_length), diagonal=1)).bool()
+        nopeak_mask = (1 - torch.triu(torch.ones(1, seq_length, seq_length), diagonal=1)).bool().to(device)
         tgt_mask = tgt_mask & nopeak_mask
         return src_mask, tgt_mask
 
@@ -219,6 +219,7 @@ from kllm.preprocess import *
 
 
 transformer = Transformer(src_vocab_size, tgt_vocab_size, d_model, num_heads, num_layers, d_ff, max_seq_length, dropout)
+transformer.to(device)
 
 # Generate random sample data
 #src_data = torch.randint(1, src_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
@@ -235,19 +236,22 @@ transformer.train()
 
 
 for epoch in range(10000):
-    print(epoch)
+    #print(epoch)
     optimizer.zero_grad()
 
     src_data,tgt_data=get_src_tgt_data(max_seq_length,batch_size)
+    src_data=src_data.to(device)
+    tgt_data=tgt_data.to(device)
 
     output = transformer(src_data, tgt_data[:, :-1])
     loss = criterion(output.contiguous().view(-1, tgt_vocab_size), tgt_data[:, 1:].contiguous().view(-1))
     loss.backward()
     optimizer.step()
-    print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
+    
 
 
-    if not epoch%1:
+    if not epoch%100:
+        print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
         transformer.eval()
 
         # Generate random sample validation data
@@ -255,6 +259,8 @@ for epoch in range(10000):
         #val_tgt_data = torch.randint(1, tgt_vocab_size, (batch_size, max_seq_length))  # (batch_size, seq_length)
         
         val_src_data,val_tgt_data=get_src_tgt_data(max_seq_length,batch_size)
+        val_src_data=val_src_data.to(device)
+        val_tgt_data=val_tgt_data.to(device)
 
         with torch.no_grad():
 
