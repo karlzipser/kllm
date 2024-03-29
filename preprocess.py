@@ -26,7 +26,7 @@ for k in v:
 #kprint(v)
 #soD('war-and-peace-data.pkl',dict(x=x,v=v))
 
-src_vocab_size=len(v)+100
+src_vocab_size=len(v)#+100
 tgt_vocab_size=src_vocab_size
 cm(src_vocab_size)
 
