@@ -4,7 +4,7 @@ from utilz2 import *
 def strip(text):
 	return re.sub(r'[^a-zA-Z\']',' ',text)
 
-x=file_to_text(opjD('War_and_Peace.txt')).lower() #(opjh('kllm/raw.txt')).lower()
+x=file_to_text(opjD('data/War_and_Peace.txt')).lower() #(opjh('kllm/raw.txt')).lower()
 x=x.replace('- \n','')
 x=x.replace('-\n','')
 x=strip(x)
