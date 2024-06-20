@@ -233,9 +233,10 @@ transformer = Transformer(src_vocab_size, tgt_vocab_size, d_model, num_heads, nu
 transformer.to(device)
 
 
-
-cb('\t',transformer.load_state_dict(torch.load(opjD('transformer_a3.pth'),map_location=torch.device(device)),strict=False))
-
+try:
+    cb('\t',transformer.load_state_dict(torch.load(opjD('transformer_a4.pth'),map_location=torch.device(device)),strict=False))
+except:
+    cE('unable to load model')
 
 
 criterion = nn.CrossEntropyLoss(ignore_index=0)
