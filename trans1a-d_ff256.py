@@ -236,7 +236,7 @@ transformer.to(device)
 try:
     cb('\t',transformer.load_state_dict(torch.load(opjD('transformer_a4.pth'),map_location=torch.device(device)),strict=False))
 except:
-    cE('unable to load model')
+    'unable to load model')
 
 
 criterion = nn.CrossEntropyLoss(ignore_index=0)
@@ -293,13 +293,18 @@ for epoch in range(epoch,100000000):
             val_output = transformer(val_src_data, val_tgt_data[:, :-1])
 
         
-            print(40*'=')
+            print(40*'_')
             for b in range(batch_size):
+                if b<batch_size//2:
+                    c='g'
+                else:
+                    val_output=train_output
+                    c='b'
                 ws=[]
                 for i in range(max_seq_length):
                     j=int(val_src_data[b,i].detach().cpu().numpy())
                     ws.append(v2w[j])
-                ws0=[' '.join(ws),'`g--']
+                ws0=[' '.join(ws),'`'+c+'--']
                 ws=[]
                 for i in range(max_seq_length-1):
                     a=val_output[b,i,:].detach().cpu().numpy()
@@ -312,7 +317,7 @@ for epoch in range(epoch,100000000):
                 ws=ws0+[' '.join(ws)]
                 clp(*ws)
 
-            print(40*'=')
+            print(40*'_')
             val_loss = criterion(val_output.contiguous().view(-1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
             print(f"Validation Loss: {val_loss.item()}")
             val_epochs.append(epoch)
@@ -332,7 +337,7 @@ for epoch in range(epoch,100000000):
 
         if save_timer.rcheck():
             print('saving weights')
-            torch.save(transformer.state_dict(),opjD('transformer_a3.pth'))
+            torch.save(transformer.state_dict(),opjD('transformer_a4.pth'))
 
 
 
