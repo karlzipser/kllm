@@ -291,7 +291,7 @@ for epoch in range(epoch,100000000):
         with torch.no_grad():
 
             val_output = transformer(val_src_data, val_tgt_data[:, :-1])
-
+            train_output = transformer(src_data, tgt_data[:, :-1])
         
             print(40*'_')
             for b in range(batch_size):
