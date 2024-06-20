@@ -19,13 +19,13 @@ dropout = 0.1
 batch_size=64
 if not torch.cuda.is_available():
     device='cpu'
-    d_model = 512
+    d_model = 64
     num_heads = 8
     num_layers = 6
     d_ff = 256
 else:
     device='cuda:1'
-    d_model = 512
+    d_model = 64
     num_heads = 8
     num_layers = 6
     d_ff = 256
