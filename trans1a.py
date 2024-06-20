@@ -16,11 +16,18 @@ import math
 import copy
 
 if not torch.cuda.is_available():
+    """
     device="cpu"
     d_model = 64
     num_heads = 8
     num_layers = 6
     d_ff = 128
+    """
+    device='cpu'
+    d_model = 512
+    num_heads = 8
+    num_layers = 6
+    d_ff = 2048
 else:
     device='cuda:0'
     d_model = 512
@@ -228,16 +235,13 @@ from kllm.preprocess import *
 #
 ###################
 
-
+device = torch.device(p.device if torch.cuda.is_available() else 'cpu')
 transformer = Transformer(src_vocab_size, tgt_vocab_size, d_model, num_heads, num_layers, d_ff, max_seq_length, dropout)
 transformer.to(device)
 
 
-try:
-    cb('\t',transformer.load_state_dict(torch.load(opjD('transformer_a3.pth')),strict=False))
-except:
-    cr('no weights loaded')
 
+cb('\t',transformer.load_state_dict(torch.load(opjD('transformer_a3.pth'),map_location=torch.device(device)),strict=False))
 
 
 
