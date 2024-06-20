@@ -14,7 +14,9 @@ import torch.optim as optim
 import torch.utils.data as data
 import math
 import copy
-
+max_seq_length = 10
+dropout = 0.1
+batch_size=64
 if not torch.cuda.is_available():
     device='cpu'
     d_model = 512
@@ -22,7 +24,7 @@ if not torch.cuda.is_available():
     num_layers = 6
     d_ff = 256
 else:
-    device='cuda:0'
+    device='cuda:1'
     d_model = 512
     num_heads = 8
     num_layers = 6
@@ -219,9 +221,7 @@ class Transformer(nn.Module):
 
 
 
-max_seq_length = 10
-dropout = 0.1
-batch_size=16
+
 ##################
 #
 from kllm.preprocess import *
