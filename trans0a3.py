@@ -1,11 +1,9 @@
+## 79 ########################################################################
 
 
 # https://www.datacamp.com/tutorial/building-a-transformer-with-py-torch
 
 # pip3 install torch torchvision torchaudio
-
-
-
 
 import torch
 import torch.nn as nn
@@ -26,6 +24,7 @@ else:
     num_heads = 8
     num_layers = 6
     d_ff = 2048
+
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
@@ -88,9 +87,6 @@ class MultiHeadAttention(nn.Module):
 
 
 
-
-
-
 class PositionWiseFeedForward(nn.Module):
     def __init__(self, d_model, d_ff):
         super(PositionWiseFeedForward, self).__init__()
@@ -100,10 +96,6 @@ class PositionWiseFeedForward(nn.Module):
 
     def forward(self, x):
         return self.fc2(self.relu(self.fc1(x)))
-
-
-
-
 
 
 
@@ -125,9 +117,6 @@ class PositionalEncoding(nn.Module):
 
 
 
-
-
-
 class EncoderLayer(nn.Module):
     def __init__(self, d_model, num_heads, d_ff, dropout):
         super(EncoderLayer, self).__init__()
@@ -143,8 +132,6 @@ class EncoderLayer(nn.Module):
         ff_output = self.feed_forward(x)
         x = self.norm2(x + self.dropout(ff_output))
         return x
-
-
 
 
 
@@ -167,7 +154,6 @@ class DecoderLayer(nn.Module):
         ff_output = self.feed_forward(x)
         x = self.norm3(x + self.dropout(ff_output))
         return x
-
 
 
 
@@ -210,14 +196,6 @@ class Transformer(nn.Module):
 
 
 
-
-
-
-
-
-
-
-
 max_seq_length = 10
 dropout = 0.1
 batch_size=16
@@ -228,24 +206,23 @@ from kllm.preprocess import *
 ###################
 
 
-transformer = Transformer(src_vocab_size, tgt_vocab_size, d_model, num_heads, num_layers, d_ff, max_seq_length, dropout)
+transformer = Transformer(
+    src_vocab_size, tgt_vocab_size,
+    d_model, num_heads, num_layers, d_ff, max_seq_length, dropout)
 transformer.to(device)
 
-
 try:
-    cb('\t',transformer.load_state_dict(torch.load(opjD('transformer_a3.pth')),strict=False))
+    cb('\t',transformer.load_state_dict(
+        torch.load(opjD('transformer_a3.pth')),strict=False))
 except:
     cr('no weights loaded')
 
 
-
-
 criterion = nn.CrossEntropyLoss(ignore_index=0)
-optimizer = optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
+optimizer = optim.Adam(
+    transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
 
 transformer.train()
-
-
 
 display_timer=Timer(30)
 display_timer.trigger()
@@ -259,24 +236,24 @@ val_index_tracker={}
 
 epoch=0
 
-
 start,stop=0,len(x)//2
 
 for epoch in range(epoch,100000000):
     printr(epoch)
     optimizer.zero_grad()
 
-    src_data,tgt_data=get_src_tgt_data(start,stop,max_seq_length,batch_size,train_index_tracker)
+    src_data,tgt_data=get_src_tgt_data(
+        start,stop,max_seq_length,batch_size,train_index_tracker)
     src_data=src_data.to(device)
     tgt_data=tgt_data.to(device)
 
     output = transformer(src_data, tgt_data[:, :-1])
-    loss = criterion(output.contiguous().view(-1, tgt_vocab_size), tgt_data[:, 1:].contiguous().view(-1))
+    loss = criterion(
+        output.contiguous().view(-1, tgt_vocab_size),
+        tgt_data[:, 1:].contiguous().view(-1))
     loss.backward()
     optimizer.step()
     
-
-
     if display_timer.rcheck():
         print(f"Epoch: {epoch+1}, Loss: {loss.item()}")
         train_epochs.append(epoch)
@@ -284,23 +261,28 @@ for epoch in range(epoch,100000000):
 
         transformer.eval()
         
-        val_src_data,val_tgt_data=get_src_tgt_data(stop,len(x),max_seq_length,batch_size,val_index_tracker)
+        val_src_data,val_tgt_data=get_src_tgt_data(
+            stop,len(x),max_seq_length,batch_size,val_index_tracker)
         val_src_data=val_src_data.to(device)
         val_tgt_data=val_tgt_data.to(device)
-
 
         with torch.no_grad():
 
             val_output = transformer(val_src_data, val_tgt_data[:, :-1])
+            train_output = transformer(src_data, tgt_data[:, :-1])
 
-        
             print(40*'=')
             for b in range(batch_size):
+                if b<batch_size//2:
+                    c='g'
+                else:
+                    val_output=train_output
+                    c='b'
                 ws=[]
                 for i in range(max_seq_length):
                     j=int(val_src_data[b,i].detach().cpu().numpy())
                     ws.append(v2w[j])
-                ws0=[' '.join(ws),'`g--']
+                ws0=[' '.join(ws),'`'+c+'--']
                 ws=[]
                 for i in range(max_seq_length-1):
                     a=val_output[b,i,:].detach().cpu().numpy()
@@ -314,7 +296,8 @@ for epoch in range(epoch,100000000):
                 clp(*ws)
 
             print(40*'=')
-            val_loss = criterion(val_output.contiguous().view(-1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
+            val_loss = criterion(val_output.contiguous().view(-
+                1, tgt_vocab_size), val_tgt_data[:, 1:].contiguous().view(-1))
             print(f"Validation Loss: {val_loss.item()}")
             val_epochs.append(epoch)
             val_losses.append(val_loss.item())
@@ -336,17 +319,4 @@ for epoch in range(epoch,100000000):
             torch.save(transformer.state_dict(),opjD('transformer_a3.pth'))
 
 
-
-
-
-
-
-
-
-
-
 #EOF
-
-
-
-
