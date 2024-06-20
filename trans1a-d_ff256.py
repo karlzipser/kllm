@@ -228,7 +228,7 @@ from kllm.preprocess import *
 #
 ###################
 
-device = torch.device(p.device if torch.cuda.is_available() else 'cpu')
+device = torch.device(device if torch.cuda.is_available() else 'cpu')
 transformer = Transformer(src_vocab_size, tgt_vocab_size, d_model, num_heads, num_layers, d_ff, max_seq_length, dropout)
 transformer.to(device)
 
