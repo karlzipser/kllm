@@ -249,6 +249,7 @@ transformer.train()
 display_timer=Timer(30)
 display_timer.trigger()
 save_timer=Timer(300)
+save_timer.trigger()
 train_epochs=[]
 train_losses=[]
 val_epochs=[]
