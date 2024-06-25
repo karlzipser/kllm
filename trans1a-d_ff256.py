@@ -267,6 +267,12 @@ for epoch in range(epoch,100000000):
     optimizer.zero_grad()
 
     src_data,tgt_data=get_src_tgt_data(start,stop,max_seq_length,batch_size,train_index_tracker)
+    #cg(tgt_data)
+    #cg(tgt_data.size(),r=0)
+    for i in range(tgt_data.size()[0]):
+        tgt_data[i,:]=tgt_data[i,0]
+    #cb(tgt_data)
+    #cb(tgt_data.size(),r=0)
     src_data=src_data.to(device)
     tgt_data=tgt_data.to(device)
 
