@@ -291,6 +291,8 @@ for epoch in range(epoch,100000000):
         transformer.eval()
         
         val_src_data,val_tgt_data=get_src_tgt_data(stop,len(x),max_seq_length,batch_size,val_index_tracker)
+        for i in range(val_tgt_data.size()[0]):
+            val_tgt_data[i,:]=val_tgt_data[i,0]
         val_src_data=val_src_data.to(device)
         val_tgt_data=val_tgt_data.to(device)
 
